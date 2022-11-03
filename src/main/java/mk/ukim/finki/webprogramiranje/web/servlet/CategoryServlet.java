@@ -1,5 +1,7 @@
 package mk.ukim.finki.webprogramiranje.web.servlet;
 
+import mk.ukim.finki.webprogramiranje.Service.CategoryService;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -11,7 +13,11 @@ import java.io.PrintWriter;
 @WebServlet(name = "category-servlet", urlPatterns = "/servlet/category")
 public class CategoryServlet extends HttpServlet {
 
+    private final CategoryService categoryService;
 
+    public CategoryServlet(CategoryService categoryService){
+        this.categoryService = categoryService;
+    }
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         //prikaz na celosna lista od kategorija
@@ -24,11 +30,12 @@ public class CategoryServlet extends HttpServlet {
         out.println("<body>");
         out.println("<h3>Info about our request</h3>");
         out.format("IP Adress: %s,Client Agent: %s ", ipAdress,clientAgent);
-//        out.format("Client Agent: %s", clientAgent);
+
 
         out.println("<h2>Category list</h2>");
         out.println("<ul>");
-
+        categoryService.listCategories().forEach(r->
+                out.format("<li>%s (%s)</li>",r.getName(),r.getDescription()));
         out.println("</ul>");
         out.println("<h3>Add Category</h3>");
 
@@ -47,8 +54,10 @@ public class CategoryServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         //dodavanje na nova kategorija od strana na korisnikot
-
-
+        String categoryName = req.getParameter("name");
+        String categoryDescription = req.getParameter("description");
+        categoryService.create(categoryName,categoryDescription);
+        resp.sendRedirect("/servlet/category");
     }
 
 }
